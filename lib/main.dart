@@ -4,9 +4,226 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(loginScreen());
 }
 
+class loginScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      // Hide the debug banner
+      debugShowCheckedModeBanner: false,
+      title: 'Login or Create Account',
+      home: _loginPage(),
+    );
+  }
+}
+
+class _loginPage extends StatefulWidget {
+  @override
+  _loginPageState createState() => _loginPageState();
+}
+
+class _loginPageState extends State<_loginPage> {
+  final UserName = TextEditingController();
+  final Password = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("PhoneBook - Login"),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextFormField(
+                controller: UserName,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'USERNAME',
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextFormField(
+                controller: Password,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'PASSWORD',
+                ),
+              ),
+            ),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => authorizeAccount()),
+                  );
+                },
+                child: Text('Login'),
+              ),
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => createAccount()),
+                      );
+                    },
+                    child: Text('Create Account'),
+                  ),
+                ))
+          ],
+        ));
+  }
+}
+
+// ignore: camel_case_types
+class authorizeAccount extends StatefulWidget {
+  @override
+  authorizeAccountState createState() => authorizeAccountState();
+}
+
+// ignore: camel_case_types
+class authorizeAccountState extends State<authorizeAccount> {
+  // ignore: non_constant_identifier_names
+  final code = TextEditingController();
+
+  void addAccount() async {
+    String _userName = code.text;
+
+    final response = await http.post(
+        Uri.http('dasal-heroku-app.herokuapp.com', '/createuser'),
+        body: {'userName': _userName});
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print("failed");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("PhoneBook - Verification"),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextFormField(
+                controller: code,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'ENTER CODE',
+                ),
+              ),
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      addAccount();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyApp()),
+                      );
+                    },
+                    child: Text('Continue'),
+                  ),
+                ))
+          ],
+        ));
+  }
+}
+
+// ignore: camel_case_types
+class createAccount extends StatefulWidget {
+  @override
+  createAccountState createState() => createAccountState();
+}
+
+// ignore: camel_case_types
+class createAccountState extends State<createAccount> {
+  // ignore: non_constant_identifier_names
+  final UserName = TextEditingController();
+  // ignore: non_constant_identifier_names
+  final Password = TextEditingController();
+
+  void addAccount() async {
+    String _userName = UserName.text;
+    String _password = Password.text;
+
+    final response = await http.post(
+        Uri.http('dasal-heroku-app.herokuapp.com', '/createuser'),
+        body: {'userName': _userName, 'password': _password});
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      print("failed");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("PhoneBook - Create Account"),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextFormField(
+                controller: UserName,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'USERNAME',
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextFormField(
+                controller: Password,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'PASSWORD',
+                ),
+              ),
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      addAccount();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => _loginPage()),
+                      );
+                    },
+                    child: Text('Create Account'),
+                  ),
+                ))
+          ],
+        ));
+  }
+}
+
+//HomePage
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -19,11 +236,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+//Homepage
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
+//HomePage
 class _HomePageState extends State<HomePage> {
   List _postJson = [];
 
@@ -35,10 +254,9 @@ class _HomePageState extends State<HomePage> {
 
   getContact() async {
     Uri url = Uri.http('dasal-heroku-app.herokuapp.com', '/get');
-    var response = await http.get(url, headers: {
-      "Accept": "application/json",
-      "Access-Control-Allow-Origin": "*"
-    });
+    var response = await http.get(
+      url,
+    );
     if (response.statusCode == 200) {
       var posts = json.decode(response.body);
       print(posts);
@@ -121,11 +339,13 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+//Create Contact
 class MyCustomForm extends StatefulWidget {
   @override
   MyCustomFormState createState() => MyCustomFormState();
 }
 
+//Create Contact
 class MyCustomFormState extends State<MyCustomForm> {
   final lastName = TextEditingController();
   final firstName = TextEditingController();
@@ -250,11 +470,13 @@ class MyCustomFormState extends State<MyCustomForm> {
   }
 }
 
+//Decide what to do with specific Contact  given
 class GetContact extends StatefulWidget {
   @override
   GetContactState createState() => GetContactState();
 }
 
+//Decide what to do with specific Contact  given
 class GetContactState extends State<GetContact> {
   final idcntrl = TextEditingController();
 
@@ -363,6 +585,7 @@ class GetContactState extends State<GetContact> {
   }*/
 }
 
+//Delete Contact
 class DeleteContact extends StatefulWidget {
   final String passId;
   const DeleteContact({Key? key, required this.passId}) : super(key: key);
@@ -370,6 +593,7 @@ class DeleteContact extends StatefulWidget {
   DeleteContactState createState() => DeleteContactState();
 }
 
+//Delete Contact
 class DeleteContactState extends State<DeleteContact> {
   @override
   Widget build(BuildContext context) {
@@ -450,6 +674,7 @@ class DeleteContactState extends State<DeleteContact> {
   }
 }
 
+//Update Contact
 class UpdateContact extends StatefulWidget {
   final String passId;
   const UpdateContact({Key? key, required this.passId}) : super(key: key);
@@ -457,6 +682,7 @@ class UpdateContact extends StatefulWidget {
   UpdateContactState createState() => UpdateContactState();
 }
 
+//update Contact
 class UpdateContactState extends State<UpdateContact> {
   final lastName = TextEditingController();
   final firstName = TextEditingController();
@@ -738,4 +964,3 @@ class UpdateContactState extends State<UpdateContact> {
             ]));
   }
 }*/
-
